@@ -1,0 +1,1 @@
+`kubectl config` - only changes client-side options, doesn't affect the state of the actual kubernetes cluster on the server side.
