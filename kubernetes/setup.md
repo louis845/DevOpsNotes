@@ -138,6 +138,12 @@ microk8s helm3 repo add gitlab https://charts.gitlab.io/
 microk8s helm3 repo update
 ```
 
+Create the server's certificate and key pair (see [the encryption README](../encryption.md)), and use the following command to establish a secret in the K8S cluster:
+```sh
+microk8s kubectl create namespace gitlab # create an empty gitlab namespace, so the TLS keys can be added
+microk8s kubectl create secret tls selfsigned-cert-tls -n gitlab --key SECRET.key --cert CERT.pem
+```
+
 Create a YAML file to update the configuration. Note that `rook-ceph-block` refers to the StorageClass previously created in the above `rook-ceph` operations.
 ```yaml
 global:
@@ -146,11 +152,16 @@ global:
   edition: ce # community addition of gitlab
   ingress:
     configureCertmanager: false
+    class: nginx # default github-nginx, set to be compatible with ingress-nginx
 gitlab:
   webservice:
     ingress:
+      # enabled: false # currently doesn't use ingress, use manual port forwarding to access gitlab's web service
       tls:
         secretName: selfsigned-cert-tls
+    #tls: # enable TLS for gitlab's web service for manual forwarding
+    #  enabled: true
+    #  secretName: selfsigned-cert-tls
 nginx-ingress:
   enabled: false
 certmanager:
@@ -169,6 +180,31 @@ redis:
 
 Install now:
 ```sh
-microk8s helm3 install gitlab gitlab/gitlab -f <file>.yaml -n gitlab --create-namespace
+microk8s helm3 install gitlab gitlab/gitlab -f <file>.yaml -n gitlab
 ```
 
+## Install NGINX Ingress controller
+Add the repos for nginx ingress to helm:
+```sh
+microk8s helm3 repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+microk8s helm3 repo update
+```
+
+Configure the Nginx ingress controller so that it doesn't expose any ports (only accessible from within the cluster/kubectl port forwarding).
+```yaml
+controller:
+  service:
+    type: ClusterIP
+    ports:
+      http: 80
+      https: 443
+  hostPort:
+    enabled: false
+  daemonset:
+    useHostPort: false
+```
+
+Install the NGINX Ingress controller on the kubernetes cluster:
+```bash
+microk8s helm install ingress-nginx ingress-nginx/ingress-nginx -f <file>.yaml -n ingress-nginx --create-namespace
+```

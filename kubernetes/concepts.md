@@ -30,10 +30,30 @@ To isolate different groups of processes, kubernetes supports namespaces so the 
 Recall that in Docker, it is necessary to specify port forwarding in the `docker-compose.yml` file so a specified port in the host will be forwarded to a port inside a specified container. Kubernetes has similar behaviour.
 
 ## Services
-
-Services acts as 
+Services acts as a flag for Kubernetes deployments / pods to declare that they are listening to a port. There are mainly these kinds of services for managing TCP sockets:
+  * ClusterIP - Services that are only accessible internally by K8S jobs
+    * Doesn't cause physical hosts to listen to any ports indicated by the ClusterIP (intended for internal use only)
+    * Still accessible by pods within the cluster, using the ClusterIP address or DNS name.
+  * NodePort - Services that make use of a ClusterIP, and makes all nodes listen to the specified port, and forwards to the ClusterIP end point.
+    * All physical nodes listen to the specified port, making this service accessible from the outside
+    * The destination is the specified ClusterIP, where the ClusterIP specifies the internal load balancing and routing and so on.
+  * LoadBalancer - Haven't used this before.
 
 ## Ingress
+Recall that some setups make use of a [reverse proxy](../encryption.md#encryption-reverse-proxy). A reverse proxy usually reads the HTTP requests and responses and forwards the HTTP requests to the backend servers, or may help upgrade HTTP to HTTPS if the server doesn't natively have TLS/HTTPS capabilities (look up [TLS termination for details](https://en.wikipedia.org/wiki/TLS_termination_proxy)). Unlike services, which operate at the TCP level, this operates at the HTTP level.
+
+Ingresses are the settings for Kubernetes to know which "HTTP services" there are, and correspondingly assign a reverse proxy to forward HTTP requests to the HTTP services. The two main parts of ingresses are:
+
+ * Ingress controller - The program for the reverse proxy (e.g NGINX)
+ * Ingress resources - The specifications the configurations of the ingress endpoints
+    * What services there are, etc...
+
+Here is the workflow of the Kubernetes ingresses:
+![ingress](ingress.png)
+
+Note that the ingress controller is like a usual Kubernetes deployment stack, itself with ClusterIP, NodePort etc configurations. The main point for Kubernetes Ingress stack is to allow to configure HTTP level routing decisions so that the ingress controller is instructed to execute such routing decisions.
+
+The diagram does left to right, so the "incoming" connections start at the Ingress controller's Services. If the ingress controller has only ClusterIP services, and also the backend servers, this will cause the backend servers to be only accessible internally, no matter the Ingress resources configuration. This is because Ingress resources only adjust how the ingress controller routes to the backend servers, but does not dictate at the TCP level whether a port has to be listened to and so on.
 
 # Helm
 Kubernetes uses Helm to install "extensions" on kubernetes. Helm is to kubernetes as is pip is to Python. The "packages" are called Helm charts, and the command is `helm/helm3` (or `microk8s helm/helm3`). 

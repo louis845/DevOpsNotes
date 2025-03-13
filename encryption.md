@@ -146,3 +146,12 @@ openssl x509 -in cert.pem -noout -text
 - https://docs.openssl.org/3.0/man1/openssl-req
 - https://docs.openssl.org/3.0/man1/openssl-x509
 - https://docs.openssl.org/3.0/man5/config/
+
+# Encryption reverse proxy
+
+Usually, organizations hide their "raw" servers behind an HTTP reverse proxy. The reverse proxy acts as a gateway to safeguard the servers behind it. The connection goes as follows:
+```
+end user -> gateway -> backend servers (e.g websites)
+```
+
+When a reverse proxy is employed, it is usually unnecessary for the backend servers to serve through TLS (though some configurations may still use that). Instead, the HTTP(S) is sent to the reverse proxy, and then reverse proxy decodes it (and possibly changes some HTTP headers) and sends the request to the backend server with HTTP, and the same happens in reverse. What happens is that the reverse proxy "upgrades" the connection from TCP to TLS, without requiring the backend server to itself support TLS.
