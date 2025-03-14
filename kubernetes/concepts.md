@@ -60,50 +60,6 @@ Kubernetes uses Helm to install "extensions" on kubernetes. Helm is to kubernete
 
 Helm charts usually create a namespace, and then creates particular deployments and so on in the newly created namespaces, so that the extensions for the kubernetes cluster can be managed by kubernetes operations itself, to reap the benefits of distributed computing.
 
-2. Network configuration
-  2.1. Services - A network abstraction layer that handles the access to pods, internal pod to pod communication
-  2.2. Ingress - Network configuration to set external communication
-3. Configuration data
-  3.1. ConfigMaps - Configuration information for non-sensitive purposes (e.g UI settings)
-  3.2. Secrets - Config for sensitive purposes (e.g API keys, passwords)
-4. Namespaces
-  4.1. Can isolate resources from the programs (deployments/jobs).
-  4.2. Can limit the resources used in the namespace.
-  4.3. Scoping - each "object" (e.g. volume) in different namespaces can have the same name
-  4.4. Unique name for the names in a namespace.
-5. Persistent volumes
-  5.1. Persistent volume - The actual storage resource
-  5.2. Persistent volume claim - A request for storage by a pod
-6. kubectl - Command for doing various jobs via kubernetes
-```
-kubectl create -f deployment.yaml     # Create resources from a file
-kubectl get pods                      # List all pods
-kubectl logs my-pod                   # View pod logs
-kubectl exec -it my-pod -- /bin/bash  # Access a running container
-kubectl apply -f updated-config.yaml  # Update resources
-kubectl delete job batch-job          # Delete a job
-kubectl scale deployment webapp --replicas=5  # Scale a deployment
-```
-7. Kubernetes YAML structure
-```
-apiVersion: [API version for this resource type]
-kind: [Resource type]
-metadata:
-  name: [Resource name]
-  namespace: [Optional namespace]
-  labels:
-    [Optional key-value pairs]
-  annotations:
-    [Optional metadata]
-spec:
-  [Resource-specific configuration]
-```
-8. Labels and selectors
-   8.1. Labels can be attached to most kubernetes resources
-   8.2. Selectors are then used to select resources with the given labels
-   8.3. Labels are attached to each resources in a dictionary style (key-value pair)
-9. 
-
 # K8S Accounts
 To interact with the Kubernetes API (the API that configures the control plane), there are two types of accounts in K8S.
 ## User accounts
@@ -115,6 +71,36 @@ Service accounts are for internal Kubernetes pods to access the Kubernetes contr
 **Assignment to pods** There is always a service account for every namespace. One can create multiple service accounts in a namespace. For each pod in the K8S cluster belonging to a namespace `N1`, there is always a *single* service account assigned to it *in the same namespace*.
 
 **Service account permissions** Service accounts are for pods to access the K8S control plane (K8S API). Their *reach/scope* dictates what kinds of operations the pods can do if they are given a specific service account. The operations a pod can do to the K8S control plane depends on the operations dictated by the configuration of the unique service account that is assigned to it.
+
+## Roles
+Roles and ClusterRoles define permissions that can be granted to accounts. K8S initializes different default existing roles that can be used to grant access to operations within the K8S cluster. For example, `cluster-admin` is a global cluster role that grants access to all possible operations for the K8S cluster. A role/clusterrole serves as a "list of operations/resources etc" that can be done. There are two types of roles:
+
+ * Role
+   * There is always exactly one namespace that the role belongs to
+   * Made to access a list of operations in a specific namespace
+ * Cluster role
+   * For operations/resources that do not depend on a particular namespace
+   * e.g. Nodes, persistent volumes, definition of namespaces etc
+   * Global, does not belong to a specific namespace, doesn't have the namespace property
+
+## Bindings
+Bindings can bind roles/cluster roles to both User and Service accounts. Here are the two main types of bindings, both of which can specify user or service account(s) to bind the roles to.
+
+ * RoleBinding
+   * Can be bound to both Roles or ClusterRoles
+   * Belongs to a namespace
+   * Bind to role
+    * Role must be in the same namespace as the RoleBinding's namespace
+    * Grants access to the Role(s) in the particular namespace
+    * Accounts can be in different namespace than the RoleBinding's namespace
+   * Bind to clusterrole
+    * The permissions granted by that cluster role will be restricted to those of the RoleBinding's namespace
+    * Non-namespace dependent resources will be dropped (e.g Nodes, namespaces themselves, PersistentVolume)
+    * Permissions won't be granted outside the namespace of the RoleBinding (for other namespaces).
+ * ClusterRoleBinding
+   * Can only be bound to ClusterRoles.
+   * The permission is to be granted cluster-wide (not dependent on namespace)
+   * Global, does not belong to a specific namespace, doesn't have the namespace property
 
 # Commands
 `kubectl describe`

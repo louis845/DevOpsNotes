@@ -156,12 +156,8 @@ global:
 gitlab:
   webservice:
     ingress:
-      # enabled: false # currently doesn't use ingress, use manual port forwarding to access gitlab's web service
       tls:
         secretName: selfsigned-cert-tls
-    #tls: # enable TLS for gitlab's web service for manual forwarding
-    #  enabled: true
-    #  secretName: selfsigned-cert-tls
 nginx-ingress:
   enabled: false
 certmanager:
@@ -171,6 +167,7 @@ certmanager-issuer:
 gitlab-runner: # gitlab-runner for CI/CD
   install: true
   runners:
+    gitlabUrl: http://gitlab-webservice-default.gitlab.svc.cluster.local
     certsSecretName: selfsigned-cert-tls
 postgresql:
   install: true
