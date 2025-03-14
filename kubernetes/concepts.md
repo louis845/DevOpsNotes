@@ -26,6 +26,8 @@ Scheduled programs that run periodically or in some expected time
 # Namespaces
 To isolate different groups of processes, kubernetes supports namespaces so the resources in namespaces are isolated from each other. This allows resources in different namespaces to have the same names, and allows rules to enforce permissions, limits on taking resources and so on.
 
+A Kubernetes resource can either be cluster-wide (global), or belong to exactly one namespace.
+
 # Network
 Recall that in Docker, it is necessary to specify port forwarding in the `docker-compose.yml` file so a specified port in the host will be forwarded to a port inside a specified container. Kubernetes has similar behaviour.
 
@@ -101,6 +103,22 @@ Bindings can bind roles/cluster roles to both User and Service accounts. Here ar
    * Can only be bound to ClusterRoles.
    * The permission is to be granted cluster-wide (not dependent on namespace)
    * Global, does not belong to a specific namespace, doesn't have the namespace property
+
+# Storage
+In Kubernetes, the storage options is quite flexible to allow many possibilities.
+
+## Storage class
+A storage class is a generic configuration to specify *how a class of persistent information is to be stored*. This gives a definition on how to use a specific storage provider, and its relevant configuration. For instance, a storage class can use a host directory as its storage provider, and the configuration options will be the specific node and the path inside the node. Rook-ceph is another storage provider.
+
+Storage classes are cluster-wide (global).
+
+## Persistent Volume
+A persistent volume (PV) is a specific instance (volume) of a storage class, that can be used to be mounted inside containers. Persistent volumes are cluster-wide (global). These are the actual instances that store data, while how the data is stored depends on the configuration by the StorageClass.
+
+## Persistent Volume claim
+A persistent volume claim (PVC) is a rule selection for K8S to assign a PV that satisfies the PVC to a pod. The PVC can specify a particular name (using the `volume-name` configuration) to require the pod to bind to a specific PV, or use a set of rules that the PV can specify for more flexibility.
+
+PVCs are namespace specific resources, and pods can only claim PVCs belonging to the same namespace as the pod.
 
 # Commands
 `kubectl describe`
