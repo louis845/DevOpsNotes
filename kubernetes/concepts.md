@@ -104,7 +104,19 @@ spec:
    8.3. Labels are attached to each resources in a dictionary style (key-value pair)
 9. 
 
-## Commands
+# K8S Accounts
+To interact with the Kubernetes API (the API that configures the control plane), there are two types of accounts in K8S.
+## User accounts
+User accounts are mainly for human operators to interact with the Kubernetes API and configure the settings for the control plane. The user account is mainly used for enabling access through the `kubectl` command, and connecting to the Kubernetes API.
+
+## Service accounts
+Service accounts are for internal Kubernetes pods to access the Kubernetes control plane itself. This can be useful as internal K8S programs may need knowledge of the Kubernetes pods they are running on, or for the programs running in pods themselves to schedule other jobs/deployments (e.g Gitlab for CI/CD).
+
+**Assignment to pods** There is always a service account for every namespace. One can create multiple service accounts in a namespace. For each pod in the K8S cluster belonging to a namespace `N1`, there is always a *single* service account assigned to it *in the same namespace*.
+
+**Service account permissions** Service accounts are for pods to access the K8S control plane (K8S API). Their *reach/scope* dictates what kinds of operations the pods can do if they are given a specific service account. The operations a pod can do to the K8S control plane depends on the operations dictated by the configuration of the unique service account that is assigned to it.
+
+# Commands
 `kubectl describe`
 `kubectl get`
 Commands to list available resources. Both commands are the same, expect that one gives more detailed output and one gives concise output in tabular form.
@@ -112,7 +124,6 @@ Commands to list available resources. Both commands are the same, expect that on
 `kubectl port-forward`
 Forwards a port from the physical machine that the `kubectl` command is installed in, to the specified destination `container:port`. Similar to SSH port forwarding, in that when the command is closed, the tunnel will be closed too.
 
-`kubectl 
 
-## Notes
+# Notes
 Hostnames of kubernetes have to be unique.

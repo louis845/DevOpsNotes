@@ -208,3 +208,23 @@ Install the NGINX Ingress controller on the kubernetes cluster:
 ```bash
 microk8s helm install ingress-nginx ingress-nginx/ingress-nginx -f <file>.yaml -n ingress-nginx --create-namespace
 ```
+
+It is now possible to use the NGINX ingress controller to access the gitlab service. The command is
+```bash
+kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 8080:80 8443:443
+```
+
+This allows the NGINX ingress controller to be accessible from the developer's device. Note that gitlab configures the ingresses to forward
+connections to its services using the HTTP host name headers, so that NGINX forwards the HTTP requests to the corresponding Gitlab services when
+the domain written in the browser is something like `gitlab.example.local` (or `gitlab.<setting>` set by the `hosts.domain` of gitlab Helm YAML).
+To allow correct DNS resolution, add the domain names to `/etc/hosts`
+```
+127.0.0.1 gitlab.example.local
+127.0.0.1 registry.example.local
+127.0.0.1 minio.example.local
+127.0.0.1 kas.example.local
+```
+To connect to the Gitlab web UI, connect to `gitlab.example.local:8443` in the browser.
+
+# Gitlab configuration
+Now setup Gitlab using the Gitlab web UI. See [this document](setup_gitlab.md).
