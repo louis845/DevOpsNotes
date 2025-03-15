@@ -123,6 +123,57 @@ Set the block as the default storage class
 microk8s kubectl patch storageclass rook-ceph-block -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
+Create another storage class to supported distributed access for multiple nodes (e.g ML dataset access across different nodes). Similarly we create a Ceph pool for it:
+```yaml
+apiVersion: ceph.rook.io/v1
+kind: CephFilesystem
+metadata:
+  name: myfs
+  namespace: rook-ceph
+spec:
+  metadataPool:
+    replicated:
+      size: 3
+      requireSafeReplicaSize: true
+  dataPools:
+    - name: mycephpool
+      replicated:
+        size: 3
+        requireSafeReplicaSize: true
+  preserveFilesystemOnDelete: true
+  metadataServer:
+    activeCount: 1
+    activeStandby: true
+    resources:
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+      requests:
+        cpu: "1"
+        memory: "2Gi"
+```
+
+And then create a StorageClass for it:
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: rook-cephfs
+provisioner: rook-ceph.cephfs.csi.ceph.com
+parameters:
+  clusterID: rook-ceph
+  fsName: myfs # reference above
+  pool: mycephpool # reference above
+  csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+  csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+  csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+  csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
+  csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+  csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+```
+
 To look at the status of rook-ceph and verify the installation, forward with the following command:
 ```sh
 # get the password, default username is admin
@@ -144,7 +195,7 @@ microk8s kubectl create namespace gitlab # create an empty gitlab namespace, so 
 microk8s kubectl create secret tls selfsigned-cert-tls -n gitlab --key SECRET.key --cert CERT.pem
 ```
 
-Create a YAML file to update the configuration. Note that `rook-ceph-block` refers to the StorageClass previously created in the above `rook-ceph` operations.
+Setup the `gitlab-ci` namespace so all CI/CD deployments will be run there, and setup a service account to restrict gitlab to there. See [here](setup_gitlab_runner_role.md) for instructions. Create a YAML file to update the configuration, so that helm can install gitlab with the correct configurations.
 ```yaml
 global:
   hosts:
@@ -166,9 +217,21 @@ certmanager-issuer:
   install: false
 gitlab-runner: # gitlab-runner for CI/CD
   install: true
+  gitlabUrl: http://gitlab-webservice-default.gitlab.svc.cluster.local:8080
+  rbac:
+    create: false
+    clusterWideAccess: false
+  serviceAccount:
+    name: gitlab-runner-svc-acct
   runners:
-    gitlabUrl: http://gitlab-webservice-default.gitlab.svc.cluster.local
-    certsSecretName: selfsigned-cert-tls
+    executor: kubernetes
+    config: |
+      [[runners]]
+        [runners.kubernetes]
+          namespace = "gitlab-ci"
+          image = "alpine"
+          privileged = false
+# namespace of runner must match that of the roles and so on, see above
 postgresql:
   install: true
 redis:

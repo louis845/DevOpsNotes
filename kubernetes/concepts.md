@@ -92,13 +92,13 @@ Bindings can bind roles/cluster roles to both User and Service accounts. Here ar
    * Can be bound to both Roles or ClusterRoles
    * Belongs to a namespace
    * Bind to role
-    * Role must be in the same namespace as the RoleBinding's namespace
-    * Grants access to the Role(s) in the particular namespace
-    * Accounts can be in different namespace than the RoleBinding's namespace
+     * Role must be in the same namespace as the RoleBinding's namespace
+     * Grants access to the Role(s) in the particular namespace
+     * Accounts can be in different namespace than the RoleBinding's namespace
    * Bind to clusterrole
-    * The permissions granted by that cluster role will be restricted to those of the RoleBinding's namespace
-    * Non-namespace dependent resources will be dropped (e.g Nodes, namespaces themselves, PersistentVolume)
-    * Permissions won't be granted outside the namespace of the RoleBinding (for other namespaces).
+     * The permissions granted by that cluster role will be restricted to those of the RoleBinding's namespace
+     * Non-namespace dependent resources will be dropped (e.g Nodes, namespaces themselves, PersistentVolume)
+     * Permissions won't be granted outside the namespace of the RoleBinding (for other namespaces).
  * ClusterRoleBinding
    * Can only be bound to ClusterRoles.
    * The permission is to be granted cluster-wide (not dependent on namespace)
@@ -113,7 +113,25 @@ A storage class is a generic configuration to specify *how a class of persistent
 Storage classes are cluster-wide (global).
 
 ## Persistent Volume
-A persistent volume (PV) is a specific instance (volume) of a storage class, that can be used to be mounted inside containers. Persistent volumes are cluster-wide (global). These are the actual instances that store data, while how the data is stored depends on the configuration by the StorageClass.
+A persistent volume (PV) is a specific instance (volume) of a storage class, that can be used to be mounted inside containers. Persistent volumes are cluster-wide (global). These are the actual instances that store data, while how the data is stored depends on the configuration by the StorageClass. 
+
+When creating a PV, one must specify an access mode for it (can be assigned with exactly one of the below):
+* RWO (ReadWriteOnce) - The volume can be mounted as read-write by a single node
+  * Only one node can mount the volume at a time
+  * That node can both read from and write to the volume
+  * Multiple pods on that same node can access it simultaneously
+
+* ROX (ReadOnlyMany) - The volume can be mounted read-only by many nodes
+  * Multiple nodes can mount the volume simultaneously
+  * All nodes can only read from it (no writing)
+  * Multiple pods across these nodes can read from it simultaneously
+
+* RWX (ReadWriteMany) - The volume can be mounted as read-write by many nodes
+  * Multiple nodes can mount the volume simultaneously
+  * All these nodes can both read from and write to the volume
+  * Multiple pods across these nodes can read/write simultaneously
+
+Once the PV is created, the access mode cannot be changed. The access mode dictate whether at the same time, the number of nodes that can access it, and the operations allowed. For RWO, if multiple pods are placed in the same node, the pods can access the PV at the same time in RW fashion.
 
 ## Persistent Volume claim
 A persistent volume claim (PVC) is a rule selection for K8S to assign a PV that satisfies the PVC to a pod. The PVC can specify a particular name (using the `volume-name` configuration) to require the pod to bind to a specific PV, or use a set of rules that the PV can specify for more flexibility.
