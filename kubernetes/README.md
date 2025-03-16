@@ -1,6 +1,10 @@
 # Kubernetes Basics
 
-## [Basic Concepts](concepts.md)
+## [Basic In-Cluster Concepts](concepts.md)
+
+## [Basic Node Concepts](concepts_nodes.md)
+
+## [Networking](concepts_networking.md)
 
 ## [Setup](setup.md)
 

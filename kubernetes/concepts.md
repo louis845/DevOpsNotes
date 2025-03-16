@@ -29,7 +29,7 @@ To isolate different groups of processes, kubernetes supports namespaces so the 
 A Kubernetes resource can either be cluster-wide (global), or belong to exactly one namespace.
 
 # Network
-Recall that in Docker, it is necessary to specify port forwarding in the `docker-compose.yml` file so a specified port in the host will be forwarded to a port inside a specified container. Kubernetes has similar behaviour.
+Recall that in Docker, it is necessary to specify port forwarding in the `docker-compose.yml` file so a specified port in the host will be forwarded to a port inside a specified container. Kubernetes has similar behaviour. After reading this section, for more information, see [the networking document](concepts_networking.md).
 
 ## Services
 Services acts as a flag for Kubernetes deployments / pods to declare that they are listening to a port. There are mainly these kinds of services for managing TCP sockets:
@@ -40,6 +40,8 @@ Services acts as a flag for Kubernetes deployments / pods to declare that they a
     * All physical nodes listen to the specified port, making this service accessible from the outside
     * The destination is the specified ClusterIP, where the ClusterIP specifies the internal load balancing and routing and so on.
   * LoadBalancer - Haven't used this before.
+
+All services must have unique names within the namespace, regardless of the type. Note that a NodePort is automatically a ClusterIP port with additional functionality that causes all physical nodes to listen to ports.
 
 ## Ingress
 Recall that some setups make use of a [reverse proxy](../encryption.md#encryption-reverse-proxy). A reverse proxy usually reads the HTTP requests and responses and forwards the HTTP requests to the backend servers, or may help upgrade HTTP to HTTPS if the server doesn't natively have TLS/HTTPS capabilities (look up [TLS termination for details](https://en.wikipedia.org/wiki/TLS_termination_proxy)). Unlike services, which operate at the TCP level, this operates at the HTTP level.

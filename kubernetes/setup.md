@@ -1,6 +1,6 @@
 # Microk8s setup
 
-Here are step by step instructions on how to setup microk8s cluster in Ubuntu with rook-ceph enabled to distribute volumes across nodes.
+Here are step by step instructions on how to setup microk8s cluster in Ubuntu with rook-ceph enabled to distribute volumes across nodes. On a setup with physical nodes that are connected to multiple physical subnets, follow additional instructions marked with the **`Multiple physical subnets`** tag.
 
 ## Change kernel parameters (in each node)
 
@@ -22,6 +22,10 @@ Use the following command to install microk8s
 ```sh
 sudo snap install microk8s --classic
 ```
+
+**`Multiple physical subnets`** 
+Set the bind addresses to the in each node to the physical subnet desired for K8S operations. See Canonical's [microk8s document](https://microk8s.io/docs/configure-host-interfaces).
+**`End`**
 
 To connect additional nodes to microk8s, use the following (in sudo). Note that the `microk8s add-node` command has to be run in the control plane node for every worker node.
 
@@ -259,9 +263,9 @@ controller:
       http: 80
       https: 443
   hostPort:
-    enabled: false
+    enabled: false # change to true if allow hostport
   daemonset:
-    useHostPort: false
+    useHostPort: false # change to true if allow hostport
 ```
 
 Install the NGINX Ingress controller on the kubernetes cluster:
@@ -285,6 +289,13 @@ To allow correct DNS resolution, add the domain names to `/etc/hosts`
 127.0.0.1 kas.example.local
 ```
 To connect to the Gitlab web UI, connect to `gitlab.example.local:8443` in the browser.
+
+## Blocking off container's access to physical devices on host nodes' subnets
+To block off container's access to physical devices on the host nodes' subnets, refer to the following [section](concepts_networking.md#block-off-podcontainer-access-to-physical-devices-on-host).
+
+**`Multiple physical subnets`** 
+Set the NodePort bind addresses and the Calico/VXLAN CLI to use the desired internal subnet for routing IP packets via VXLAN and accepting connections for NodePort, as per [here](concepts_networking.md#nodeport) and [here](concepts_networking.md#internal-cluster-routing-on-which-physical-subnet).
+**`End`**
 
 # Gitlab configuration
 Now setup Gitlab using the Gitlab web UI. See [this document](setup_gitlab.md).
