@@ -9,6 +9,7 @@ Link Layer (MAC) -> Internet Layer (IP/ICMP)  -> Transport layer (TCP/UDP etc)
 Low level                         ------>                           High level
 ```
 
+Note that ICMP is over IP, but is not directly on the transport layer.
 ##  IPv4 packet routing
 A subnet are all IPs of the form:
     * `a.b.c.xxx`
