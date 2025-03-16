@@ -33,7 +33,7 @@ To configure on which physical subnet (by CIDR) Calico VXLAN uses for routing th
 ### Block off pod/container access to physical devices on host
 According to [Calico's document](https://docs.tigera.io/calico/latest/networking/configuring/workloads-outside-cluster#use-additional-ip-pools-to-specify-addresses-that-can-be-reached-without-nat), it is possible to disable NAT to specific CIDR ranges by creating custom disabled IP pools with that CIDR, so that Calico doesn't apply NAT to those destinations as its one of the registed IP pools, but no pods are assigned that IP since its disabled. For example, disallowing NAT for `192.168.1.*` will be
 ```yaml
-apiVersion: projectcalico.org/v3
+apiVersion: projectcalico.org/v3 # note: use crd.projectcalico.org/v1 for microk8s
 kind: IPPool
 metadata:
   name: no-nat-192.168.1.0-8

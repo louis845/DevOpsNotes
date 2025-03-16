@@ -59,4 +59,19 @@ kubectl port-forward -n rook-ceph services/rook-ceph-mgr-dashboard 8000:8443
 
 # NGINX controller
 kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 8080:80 8443:443
+
+# gitlab initial password
+kubectl get -n gitlab secret/gitlab-gitlab-initial-root-password -o jsonpath='{.data.password}' | base64 --decode
 ```
+
+# Debugging commands
+Here are some commands for debugging by spinning up custom temporary pods, or starting a process within a container in a pod.
+```sh
+kubectl run busybox-test --rm -it --image=busybox -- /bin/sh # runs busybox in a temporary pod
+kubectl run busybox-test --rm -it --image=busybox --overrides='{"spec":{"nodeName":"<specific node name>"}}' -- /bin/sh # specify node name
+
+kubectl exec -it pod-name -- /bin/sh # starts an interactive shell in an existing pod
+# write -c <container name> for exec to specify which container to connect to
+```
+
+The `kubectl exec` command allows you to execute commands directly inside a running container. The `-it` flags make it interactive, so you get a shell prompt where you can run multiple commands like ping, netstat, or other networking tools.

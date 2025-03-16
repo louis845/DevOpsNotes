@@ -116,7 +116,7 @@ parameters:
   csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
   csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
   csi.storage.k8s.io/fstype: ext4
-reclaimPolicy: Retain
+reclaimPolicy: Delete # note that data is automatically deleted when the PVC is deleted
 allowVolumeExpansion: true
 mountOptions:
   - debug
@@ -166,15 +166,15 @@ metadata:
 provisioner: rook-ceph.cephfs.csi.ceph.com
 parameters:
   clusterID: rook-ceph
-  fsName: myfs # reference above
-  pool: mycephpool # reference above
+  fsName: myfs
   csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
   csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
   csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
   csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
   csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
   csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
-reclaimPolicy: Retain
+  mounter: fuse # FUSE is a bit slower, but the kernel mounter for CephFS is now bugged (gives libceph: mon1 (1)192.168.100.100:3300 socket closed (con state V1_BANNER), probably version problem, mon uses V2)
+reclaimPolicy: Delete # note that data is automatically deleted when the PVC is deleted
 allowVolumeExpansion: true
 ```
 
