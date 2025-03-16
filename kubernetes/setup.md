@@ -297,5 +297,8 @@ To block off container's access to physical devices on the host nodes' subnets, 
 Set the NodePort bind addresses and the Calico/VXLAN CLI to use the desired internal subnet for routing IP packets via VXLAN and accepting connections for NodePort, as per [here](concepts_networking.md#nodeport) and [here](concepts_networking.md#internal-cluster-routing-on-which-physical-subnet).
 **`End`**
 
+# Allowing kubectl access from elsewhere
+In the node with the microk8s control plane, the (client) settings for `kubectl` is stored inside `/var/snap/microk8s/current/credentials/client.config`, which contains complete TLS (client key, client cert, CA cert) pair for mTLS. Copy the file to another device's `~/.kube/config` and modify the IP to point to the K8S cluster (usually port 16443) to allow connections from outside.
+
 # Gitlab configuration
 Now setup Gitlab using the Gitlab web UI. See [this document](setup_gitlab.md).
