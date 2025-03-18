@@ -44,8 +44,13 @@ sudo microk8s stop # stop the microk8s to configure stuff first
 ### Multiple physical subnets
 
 **`Multiple physical subnets`** 
-Set the bind addresses to the in each node to the physical subnet desired for K8S operations. See Canonical's [microk8s document](https://microk8s.io/docs/configure-host-interfaces).
+Set the bind addresses to the in each node to the physical subnet desired for K8S operations. See Canonical's [microk8s document](https://microk8s.io/docs/configure-host-interfaces). Set the NodePort bind addresses and the Calico/VXLAN CLI to use the desired internal subnet for routing IP packets via VXLAN and accepting connections for NodePort, as per [here](concepts_networking.md#nodeport) and [here](concepts_networking.md#internal-cluster-routing-on-which-physical-subnet).
 **`End`**
+
+To replace all references to the K8S API with the node's IP on the correct subnet (from `127.0.0.1` to `<IP>`) use the following command, where it is not necessary to escape characters in `<IP>` (e.g. just write `192.168.1.100` plainly).
+```sh
+find /var/snap/microk8s/current/credentials -type f -exec sed -i 's/127\.0\.0\.1:16443/<IP>:16443/g' {} +
+```
 
 ### Setting CA for custom registry
 
@@ -319,10 +324,6 @@ and mark the ClusterIP down in **PARAMETERS_TO_PREPARE** as *INGRESS_CLUSTER_IP*
 
 ## Blocking off container's access to physical devices on host nodes' subnets
 To block off container's access to physical devices on the host nodes' subnets, refer to the following [section](concepts_networking.md#block-off-podcontainer-access-to-physical-devices-on-host).
-
-**`Multiple physical subnets`** 
-Set the NodePort bind addresses and the Calico/VXLAN CLI to use the desired internal subnet for routing IP packets via VXLAN and accepting connections for NodePort, as per [here](concepts_networking.md#nodeport) and [here](concepts_networking.md#internal-cluster-routing-on-which-physical-subnet).
-**`End`**
 
 # Allowing kubectl access from elsewhere
 In the node with the microk8s control plane, the (client) settings for `kubectl` is stored inside `/var/snap/microk8s/current/credentials/client.config`, which contains complete TLS (client key, client cert, CA cert) pair for mTLS. Copy the file to another device's `~/.kube/config` and modify the IP to point to the K8S cluster (usually port 16443) to allow connections from outside.
