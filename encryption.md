@@ -141,6 +141,12 @@ Using a preexisting certificate (already signed), view the miscellaneous informa
 openssl x509 -in cert.pem -noout -text
 ```
 
+## 6. Verifying TLS connecting to actual server
+When a server is hosted, use the following command to verify TLS connecting to the actual server:
+```
+openssl s_client -connect <domain/IP>:<port> -CAfile <cafile>.pem
+```
+
 ## References
 - https://docs.openssl.org/3.0/man1/openssl-genpkey/
 - https://docs.openssl.org/3.0/man1/openssl-req
