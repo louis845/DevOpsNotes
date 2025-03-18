@@ -45,6 +45,8 @@ sudo microk8s stop # stop the microk8s to configure stuff first
 
 **`Multiple physical subnets`** 
 Set the bind addresses to the in each node to the physical subnet desired for K8S operations. See Canonical's [microk8s document](https://microk8s.io/docs/configure-host-interfaces). Set the NodePort bind addresses and the Calico/VXLAN CLI to use the desired internal subnet for routing IP packets via VXLAN and accepting connections for NodePort, as per [here](concepts_networking.md#nodeport) and [here](concepts_networking.md#internal-cluster-routing-on-which-physical-subnet).
+
+After testing, fixing the subnet doesn't quite work well and has problems with Microk8s for now. Do not do this until some updates for microk8s officially support this feature, or use another K8S installation.
 **`End`**
 
 To replace all references to the K8S API with the node's IP on the correct subnet (from `127.0.0.1` to `<IP>`) use the following command, where it is not necessary to escape characters in `<IP>` (e.g. just write `192.168.1.100` plainly).
