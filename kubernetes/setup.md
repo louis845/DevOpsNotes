@@ -38,11 +38,30 @@ harbor.example.local
 Use the following command to install microk8s
 ```sh
 sudo snap install microk8s --classic
+sudo microk8s stop # stop the microk8s to configure stuff first
 ```
+
+### Multiple physical subnets
 
 **`Multiple physical subnets`** 
 Set the bind addresses to the in each node to the physical subnet desired for K8S operations. See Canonical's [microk8s document](https://microk8s.io/docs/configure-host-interfaces).
 **`End`**
+
+### Setting CA for custom registry
+
+For reference, look at [official microk8s docs](https://microk8s.io/docs/registry-private). In each of the nodes, create a file `/var/snap/microk8s/current/args/certs.d/10.152.183.59/hosts.toml` with the contents:
+```toml
+# /var/snap/microk8s/current/args/certs.d/10.152.183.59/hosts.toml
+server = "https://10.152.183.59"
+
+[host."https://10.152.183.59"]
+capabilities = ["pull", "resolve"]
+ca = "/var/snap/microk8s/current/args/certs.d/10.152.183.59/ca.crt"
+```
+
+and copy the `rootCA.crt` to `/var/snap/microk8s/current/args/certs.d/10.152.183.59/ca.crt` in every node.
+
+## Connecting nodes
 
 To connect additional nodes to microk8s, use the following (in sudo). Note that the `microk8s add-node` command has to be run in the control plane node for every worker node.
 
