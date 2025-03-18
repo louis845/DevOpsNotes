@@ -7,3 +7,12 @@ Gitlab has a WebUI, which works similar to Github and also hosts different Git r
 ![gitlab](gitlab_diagram.png)
 
 The above is a Gitlab instance hosted outside K8S, and the typical setup is for the Gitlab instance to connect to the Gitlab runner within the K8S cluster, which will then run CI/CD jobs within a particular namespace. Of course, one can host the Gitlab instance in the K8S cluster also. The Gitlab runner acts as a "scheduler" for the jobs, and it is given a service account to access a particular namespace (usually a namespace other than the one which hosts the Gitlab runner/Gitlab components).
+
+## Gitlab SSH exposure
+Expose Gitlab SSH via NodePort (so its accessible within the physical subnet). In the below, it will be exposed via port 32222 on the physical nodes.
+```
+kubectl patch svc gitlab-gitlab-shell -n gitlab --type='json' -p='[
+  {"op": "replace", "path": "/spec/type", "value": "NodePort"},
+  {"op": "replace", "path": "/spec/ports/0/nodePort", "value": 32222}
+]'
+```

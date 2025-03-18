@@ -62,6 +62,10 @@ kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 8080:80 8443:
 
 # gitlab initial password
 kubectl get -n gitlab secret/gitlab-gitlab-initial-root-password -o jsonpath='{.data.password}' | base64 --decode
+
+# SSH access to gitlab
+ssh -T git@gitlab.example.local -p 32222
+git clone ssh://git@gitlab.example.local:32222/<username>/<repo>.git # how to use git operations on a repo
 ```
 
 # Debugging commands

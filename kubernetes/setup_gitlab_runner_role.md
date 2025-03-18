@@ -67,8 +67,8 @@ rules:
 # YAML for Gitlab Runner service account and bindings
 Create a service account and namespace for Gitlab and Gitlab runner:
 ```sh
-microk8s kubectl create namespace gitlab # create the gitlab namespace if not exists
-microk8s kubectl create serviceaccount gitlab-runner-svc-acct -n gitlab # create empty service account
+microk8s kubectl create namespace gitlab-runner # create the gitlab-runner namespace if not exists
+microk8s kubectl create serviceaccount gitlab-runner-svc-acct -n gitlab-runner # create empty service account
 ```
 
 Now apply the YAML to bind the role to the service account:
@@ -85,5 +85,5 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gitlab-runner-svc-acct
-  namespace: gitlab
+  namespace: gitlab-runner
 ```
