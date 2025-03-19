@@ -13,17 +13,14 @@ microk8s kubectl create secret generic -n harbor-jobs self-administered-ca-cert 
 ```
 
 ## Install harbor via helm
-Use helm to install harbor. A reference values configuration is given in [Harbor's Github repo](https://github.com/goharbor/harbor-helm/blob/main/values.yaml). 
+Use helm to install harbor. A reference values configuration is given in [Harbor's Github repo](https://github.com/goharbor/harbor-helm/blob/main/values.yaml). Use the [following guide](setup_harbor_config.md) as a configuration for the `values.yaml`.
 
 ```sh
+microk8s helm3 repo add harbor https://helm.goharbor.io
+microk8s helm fetch harbor/harbor --untar # its necessary to install harbor using the untarred folder
+cd harbor
 microk8s helm3 install -n harbor harbor harbor/harbor -f values.yaml
 ```
-
-Get the internal clusterIP of the NGINX ingress controller using the command
-```sh
-kubectl get service -n harbor harbor
-```
-and mark it down in **PARAMETERS_TO_PREPARE** as *HARBOR_CLUSTER_IP*.
 
 ## Setting up namespace for harbor jobs
 Here is the YAML to setup the role for the Gitlab Harbor runner ([reference](https://docs.gitlab.com/runner/executors/kubernetes/#configure-runner-api-permissions)):
@@ -110,7 +107,7 @@ subjects:
 ## Create a Gitlab runner for compiling Harbor jobs
 It is necessary to generate a runner token using the Admin panel in the Gitlab web UI. For instructions, see [Gitlab's website](https://docs.gitlab.com/ci/runners/runners_scope/#create-an-instance-runner-with-a-runner-authentication-token). Use the `harbor` tag so Gitlab stages with the `harbor` tag will specifically use this runner. After getting the runner token, set the value below in the Helm chart YAML.
 
-Things to replace: `<generated runner token>`, `INGRESS_CLUSTER_IP`, `HARBOR_CLUSTER_IP`.
+Things to replace: `<generated runner token>`, `INGRESS_CLUSTER_IP`.
 ```yaml
 image:
   registry: registry.gitlab.com
@@ -140,7 +137,7 @@ runners:
           ip = "<replace with INGRESS_CLUSTER_IP>"
           hostnames = ["gitlab.example.local"]
         [[runners.kubernetes.host_aliases]]
-          ip = "<replace with HARBOR_CLUSTER_IP>"
+          ip = "10.152.183.59"
           hostnames = ["harbor.example.local"]
         [[runners.kubernetes.volumes.secret]]
           name = "self-administered-ca-cert"

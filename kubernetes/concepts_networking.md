@@ -38,9 +38,9 @@ According to [Calico's document](https://docs.tigera.io/calico/latest/networking
 apiVersion: projectcalico.org/v3 # note: use crd.projectcalico.org/v1 for microk8s
 kind: IPPool
 metadata:
-  name: no-nat-192.168.1.0-8
+  name: no-nat-192.168.1.0-24
 spec:
-  cidr: 192.168.1.0/8
+  cidr: 192.168.1.0/24
   disabled: true
 ```
 and applying `kubectl apply -f <file>.yaml` to it.

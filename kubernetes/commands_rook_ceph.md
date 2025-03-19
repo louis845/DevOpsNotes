@@ -65,6 +65,6 @@ kubectl -n rook-ceph scale deployment rook-ceph-operator --replicas=1
 
 ## Setting rook-ceph flags
 ```sh
-kubectl -n $ROOK_CLUSTER_NAMESPACE exec -it deploy/rook-ceph-tools -- bash
+kubectl -n rook-ceph exec -it deploy/rook-ceph-tools -- bash
 ceph osd unset noout # inside the rook-ceph-tools pod
 ```

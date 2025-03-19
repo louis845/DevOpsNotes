@@ -17,6 +17,17 @@ Now add tokens to the Gitlab accounts via the Gitlab Web UI. To allow SSH access
 microk8s kubectl patch service gitlab-gitlab-shell -n gitlab -p '{"spec": {"type": "NodePort", "ports": [{"port": 22, "nodePort": 32222, "protocol": "TCP"}]}}'
 ```
 
+To git clone from the machine, connect to any K8S node, and use the command
+```sh
+git clone ssh://<node IP>:32222/<username>/<repo>.git
+```
+
+For example,
+```sh
+git clone git.example.local:user/repo.git # original from Gitlab
+git clone ssh://<node IP>:32222/user/repo.git # new clone command
+```
+
 ## Setup Gitlab runner
 For basic concepts of Gitlab for CI/CD, refer to [this document](gitlab.md). Setup the `gitlab-ci` namespace so all CI/CD deployments will be run there, and setup a service account in a new `gitlab-runner` namespace to restrict gitlab to only use `gitlab-ci`. See [here](setup_gitlab_runner_role.md) for instructions. Create a YAML file to update the configuration, so that helm can install gitlab with the correct configurations. [View the official YAML reference](https://gitlab.com/gitlab-org/charts/gitlab-runner/blob/main/values.yaml).
 
@@ -50,10 +61,6 @@ runners:
         [[runners.kubernetes.host_aliases]]
           ip = "<replace with found cluster IP>"
           hostnames = ["gitlab.example.local"]
-        [[runners.kubernetes.volumes.secret]]
-          name = "self-administered-ca-cert"
-          mount_path = "/etc/gitlab/certs"
-          readonly = true
 # for k8s runner config, see https://docs.gitlab.com/runner/executors/kubernetes/#add-extra-host-aliases
 # note that we disable TLS only for gitlab.example.local. there is a problem of verifying self-signed certs
 certsSecretName: self-administered-ca-cert

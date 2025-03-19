@@ -292,12 +292,12 @@ Configure the Nginx ingress controller so that it doesn't expose any ports (only
 ```yaml
 controller:
   service:
-    type: ClusterIP
+    type: NodePort
     ports:
       http: 80
       https: 443
   hostPort:
-    enabled: true # change to true if allow hostport
+    enabled: false # change to true if allow hostport
   daemonset:
     useHostPort: false # change to true if allow hostport
 ```
@@ -338,3 +338,6 @@ In the node with the microk8s control plane, the (client) settings for `kubectl`
 
 # Gitlab configuration
 Now setup Gitlab using the Gitlab web UI. See [this document](setup_gitlab.md).
+
+# Harbor configuration
+Now setup Harbor to create a Gitlab runner for compiling Docker images (using kaniko). See [this document](setup_harbor.md).
