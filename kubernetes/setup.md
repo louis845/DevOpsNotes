@@ -46,13 +46,13 @@ sudo microk8s stop # stop the microk8s to configure stuff first
 **`Multiple physical subnets`** 
 Set the bind addresses to the in each node to the physical subnet desired for K8S operations. See Canonical's [microk8s document](https://microk8s.io/docs/configure-host-interfaces). Set the NodePort bind addresses and the Calico/VXLAN CLI to use the desired internal subnet for routing IP packets via VXLAN and accepting connections for NodePort, as per [here](concepts_networking.md#nodeport) and [here](concepts_networking.md#internal-cluster-routing-on-which-physical-subnet).
 
-After testing, fixing the subnet doesn't quite work well and has problems with Microk8s for now. Do not do this until some updates for microk8s officially support this feature, or use another K8S installation.
-**`End`**
-
 To replace all references to the K8S API with the node's IP on the correct subnet (from `127.0.0.1` to `<IP>`) use the following command, where it is not necessary to escape characters in `<IP>` (e.g. just write `192.168.1.100` plainly).
 ```sh
 find /var/snap/microk8s/current/credentials -type f -exec sed -i 's/127\.0\.0\.1:16443/<IP>:16443/g' {} +
 ```
+
+After testing, fixing the subnet doesn't quite work well and has problems with Microk8s for now. Do not do this until some updates for microk8s officially support this feature, or use another K8S installation.
+**`End`**
 
 ### Setting CA for custom registry
 
@@ -66,7 +66,7 @@ capabilities = ["pull", "resolve"]
 ca = "/var/snap/microk8s/current/args/certs.d/10.152.183.59/ca.crt"
 ```
 
-and copy the `rootCA.crt` to `/var/snap/microk8s/current/args/certs.d/10.152.183.59/ca.crt` in every node.
+and copy the `rootCA.crt` to `/var/snap/microk8s/current/args/certs.d/10.152.183.59/ca.crt` in every node. Write `snap restart microk8s` afterwards.
 
 ## Connecting nodes
 
@@ -126,6 +126,12 @@ Create a [YAML file](setup_rook_ceph_yaml.md) and use `microk8s kubectl apply -f
   * Ceph version. `spec -> ceph version -> image`
   * Particulars of k8s nodes. `spec -> storage -> nodes`
 Create another [YAML file to set the contents of the rook-ceph operator](setup_rook_ceph_operator.md) and use `microk8s kubectl apply -f <file>.yml`.
+
+Choose the correct version of rook-ceph, and install rook-ceph-tools so administration configuration is possible:
+```sh
+# for example
+microk8s kubectl apply -f https://raw.githubusercontent.com/rook/rook/release-1.16/deploy/examples/toolbox.yaml
+```
 
 Now set rook-ceph to replicate data across the clusters, so the data can be automatically be distributed with the CRUSH algorithm.
 ```yaml
