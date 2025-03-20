@@ -29,6 +29,7 @@ registry.example.local
 minio.example.local
 kas.example.local
 harbor.example.local
+grafana.example.local
 ```
 
 **PARAMETERS_TO_PREPARE** Store the `SECRET.key`, `CERT.pem` and `rootCA.crt` as files, they are to be reused.
@@ -341,3 +342,10 @@ Now setup Gitlab using the Gitlab web UI. See [this document](setup_gitlab.md).
 
 # Harbor configuration
 Now setup Harbor to create a Gitlab runner for compiling Docker images (using kaniko). See [this document](setup_harbor.md).
+
+# NVIDIA GPU and Grafana installation
+```sh
+microk8s enable nvidia
+```
+
+Afterwards, install Grafana and Prometheus to look at the metrics. See [this document](setup_grafana.md).

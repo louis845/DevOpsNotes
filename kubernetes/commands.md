@@ -66,6 +66,10 @@ kubectl get -n gitlab secret/gitlab-gitlab-initial-root-password -o jsonpath='{.
 # SSH access to gitlab
 ssh -T git@gitlab.example.local -p 32222
 git clone ssh://git@gitlab.example.local:32222/<username>/<repo>.git # how to use git operations on a repo
+
+# Metrics dashboard (including GPU metrics)
+kubectl get secret -n monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo # admin name is `admin`
+kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80
 ```
 
 # Debugging commands
