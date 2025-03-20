@@ -147,6 +147,9 @@ When a server is hosted, use the following command to verify TLS connecting to t
 openssl s_client -connect <domain/IP>:<port> -CAfile <cafile>.pem
 ```
 
+## 7. Sample scripts for generating a TLS certs signed by a rootCA
+Not recommended for actual production! Only for development or secure internal environments. See [here](encryption_test_scripts/README.md).
+
 ## References
 - https://docs.openssl.org/3.0/man1/openssl-genpkey/
 - https://docs.openssl.org/3.0/man1/openssl-req

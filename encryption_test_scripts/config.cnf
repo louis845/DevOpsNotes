@@ -1,0 +1,15 @@
+[ customIPAndDomains ]
+subjectAltName          = @alt_names
+
+[ client_auth_ext ]
+extendedKeyUsage = clientAuth
+
+[ alt_names ]
+IP.1  = 127.0.0.1
+IP.2  = 10.152.183.59
+DNS.1 = gitlab.example.local
+DNS.2 = registry.example.local
+DNS.3 = minio.example.local
+DNS.4 = kas.example.local
+DNS.5 = harbor.example.local
+DNS.6 = grafana.example.local
