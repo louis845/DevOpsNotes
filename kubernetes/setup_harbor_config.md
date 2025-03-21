@@ -1,5 +1,7 @@
 There are a few things to be set, search it up by the string `THINGS_TO_SET`. The first is the login credentials to push and pull and access the Harbor service. The username is `admin` and the password will be the one set in the YAML. The second is a randomly generated key string used internally. The third is a randomly generated `(username, password)` pair for Harbor to be used internally (not used externally for pull/push).
 
+Also, adjust the size of the Harbor registry in deployments, since some images may be quite large.
+
 ```yaml
 expose:
   type: clusterIP
