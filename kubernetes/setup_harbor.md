@@ -143,6 +143,10 @@ runners:
           name = "self-administered-ca-cert"
           mount_path = "/etc/harbor/certs"
           readonly = true
+        [[runners.kubernetes.volumes.secret]]
+          name = "repo-login-credentials"
+          mount_path = "/kaniko/.docker"
+          readonly = true
 # for k8s runner config, see https://docs.gitlab.com/runner/executors/kubernetes/#add-extra-host-aliases
 # note that we disable TLS only for gitlab.example.local. there is a problem of verifying self-signed certs
 certsSecretName: self-administered-ca-cert
@@ -155,4 +159,19 @@ service:
 Now install the gitlab-runner with:
 ```sh
 microk8s helm3 install gitlab-runner gitlab/gitlab-runner -n harbor-runner -f <file>.yaml
+```
+
+Create a `repo-login-credentials` K8S secret so that Kaniko is able to login to the local Harbor registry. Additionally, allow it to login to the Docker registry. To not use the Docker login credentials, remove the `index.docker.io` part.
+```json
+{
+  "auths": {
+    "10.152.183.59": {"username": "admin", "password": "somepassword"},
+    "https://index.docker.io/v1/": {"username": "mydockeruser", "password": "dockertoken"}
+  }
+}
+```
+
+
+```sh
+kubectl create secret generic -n harbor-jobs repo-login-credentials --from-file=config.json=<local file config>.json
 ```

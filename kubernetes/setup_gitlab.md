@@ -29,6 +29,8 @@ git clone ssh://<node IP>:32222/user/repo.git # new clone command
 ```
 
 ## Setup Gitlab runner
+There is a convenience script for creating Gitlab runners within a specific namespace in [here](../cicd_build/script.md). Read the below for an explanation.
+
 For basic concepts of Gitlab for CI/CD, refer to [this document](gitlab.md). Setup the `gitlab-ci` namespace so all CI/CD deployments will be run there, and setup a service account in a new `gitlab-runner` namespace to restrict gitlab to only use `gitlab-ci`. See [here](setup_gitlab_runner_role.md) for instructions. Create a YAML file to update the configuration, so that helm can install gitlab with the correct configurations. [View the official YAML reference](https://gitlab.com/gitlab-org/charts/gitlab-runner/blob/main/values.yaml).
 
 It is necessary to generate a runner token using the Admin panel in the Gitlab web UI. For instructions, see [Gitlab's website](https://docs.gitlab.com/ci/runners/runners_scope/#create-an-instance-runner-with-a-runner-authentication-token). After getting the runner token, set the value below in the Helm chart YAML. Also, find the internal cluster IP the NGINX ingress controller is listening to, so the Gitlab runner can simulate connecting from outside the cluster.
