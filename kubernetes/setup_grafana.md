@@ -66,5 +66,6 @@ Afterwards, install it via the commands, and add the secret to the namespace:
 helm3 repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm3 repo update
 kubectl create namespace monitoring
+kubectl create secret tls selfsigned-cert-tls -n monitoring --key SECRET.key --cert CERT.pem
 helm3 install prometheus prometheus-community/kube-prometheus-stack -n monitoring -f values.yaml
 ```
