@@ -77,6 +77,37 @@ Here are some commands for debugging by spinning up custom temporary pods, or st
 ```sh
 kubectl run busybox-test --rm -it --image=busybox -- /bin/sh # runs busybox in a temporary pod
 kubectl run busybox-test --rm -it --image=busybox --overrides='{"spec":{"nodeName":"<specific node name>"}}' -- /bin/sh # specify node name
+# create a pod that specifies nodename, and mounts the PVC pvctest into the container to /data
+kubectl run python-test --rm -it --image=python:latest --overrides='{
+  "spec": {
+    "nodeSelector": {
+      "kubernetes.io/hostname": "your-node-name"
+    },
+    "volumes": [
+      {
+        "name": "data-volume",
+        "persistentVolumeClaim": {
+          "claimName": "pvctest"
+        }
+      }
+    ],
+    "containers": [
+      {
+        "name": "python-test",
+        "image": "python:latest",
+        "stdin": true,
+        "tty": true,
+        "command": ["/bin/bash"],
+        "volumeMounts": [
+          {
+            "name": "data-volume",
+            "mountPath": "/data"
+          }
+        ]
+      }
+    ]
+  }
+}' -- /bin/bash
 
 kubectl exec -it pod-name -- /bin/sh # starts an interactive shell in an existing pod
 # write -c <container name> for exec to specify which container to connect to
