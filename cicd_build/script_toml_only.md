@@ -1,6 +1,4 @@
-This is a convenience script that creates a Gitlab runner in the `<name>-runner` namespace, which has permissions to execute jobs in `<name>-ci` namespace, with minimal permissions. Additionally, a `[hostname]` can be specified to explicitly specify which node to run the CI/CD jobs in. This script expects a `gitlabCA.crt` file inside the same folder as it, that is used for verify the identity for the locally hosted Gitlab instance. For explanation, see [here](../kubernetes/setup_gitlab.md#setup-gitlab-runner). For more options on the Kubernetes Gitlab runner, see [Gitlab's official website](https://docs.gitlab.com/runner/executors/kubernetes/), which supports mounting PVs and so on...
-
-For the version that uses TOML only (but doesn't specify the hostname), see [this file](script_toml_only.md).
+This is a convenience script that creates a Gitlab runner in the `<name>-runner` namespace, which has permissions to execute jobs in `<name>-ci` namespace, with minimal permissions, and with extra TOML configurations for the Gitlab CI runner. For more options on the Kubernetes Gitlab runner, see [Gitlab's official website](https://docs.gitlab.com/runner/executors/kubernetes/).
 
 # Script
 ```sh
@@ -22,43 +20,39 @@ if ! command -v helm &> /dev/null; then
 fi
 
 # Check if arguments are provided
-if [ $# -lt 2 ] || [ $# -gt 4 ]; then
-    echo "Usage: $0 <name> <token> [hostname] [toml_file]"
+if [ $# -lt 3 ] || [ $# -gt 3 ]; then
+    echo "Usage: $0 <name> <token> <toml_file>"
     echo "  <name>: Name prefix for namespaces (<name>-runner and <name>-ci)"
     echo "  <token>: GitLab runner registration token"
-    echo "  [hostname]: Optional - Kubernetes node hostname to restrict runner to"
-    echo "  [toml_file]: Optional - Path to additional TOML configuration for the runner"
+    echo "  <toml_file>: Path to additional TOML configuration for the runner"
     exit 1
 fi
 
 NAME=$1
 TOKEN=$2
-HOSTNAME=$3
-TOML_FILE=$4
+TOML_FILE=$3
 RUNNER_NAMESPACE="${NAME}-runner"
 CI_NAMESPACE="${NAME}-ci"
 TMP_FILE="values.yaml"
 
 # Check if TOML file exists and is readable if provided
-if [ -n "$TOML_FILE" ]; then
-    if [ ! -f "$TOML_FILE" ]; then
-        echo "Error: TOML file $TOML_FILE does not exist."
-        exit 1
-    fi
-    
-    if [ ! -r "$TOML_FILE" ]; then
-        echo "Error: TOML file $TOML_FILE is not readable."
-        exit 1
-    fi
-    
-    # Basic check if it looks like a TOML file
-    if ! grep -q '=' "$TOML_FILE" && ! grep -q '\[\[' "$TOML_FILE"; then
-        echo "Warning: File $TOML_FILE may not be a valid TOML file."
-        echo "Continuing anyway, but this may cause configuration issues."
-    fi
-    
-    echo "Using additional TOML configuration from: $TOML_FILE"
+if [ ! -f "$TOML_FILE" ]; then
+    echo "Error: TOML file $TOML_FILE does not exist."
+    exit 1
 fi
+
+if [ ! -r "$TOML_FILE" ]; then
+    echo "Error: TOML file $TOML_FILE is not readable."
+    exit 1
+fi
+
+# Basic check if it looks like a TOML file
+if ! grep -q '=' "$TOML_FILE" && ! grep -q '\[\[' "$TOML_FILE"; then
+    echo "Warning: File $TOML_FILE may not be a valid TOML file."
+    echo "Continuing anyway, but this may cause configuration issues."
+fi
+
+echo "Using additional TOML configuration from: $TOML_FILE"
 
 if [ -f "$TMP_FILE" ]; then
     echo "$TMP_FILE already exists!"
@@ -96,9 +90,6 @@ echo "Setting up GitLab Runner with:"
 echo "  Runner namespace: $RUNNER_NAMESPACE"
 echo "  CI namespace: $CI_NAMESPACE"
 echo "  Token: $TOKEN"
-if [ -n "$HOSTNAME" ]; then
-    echo "  Node hostname: $HOSTNAME"
-fi
 
 # Get the cluster IP for the ingress controller
 CLUSTER_IP=$(kubectl get -n ingress-nginx svc/ingress-nginx-controller -o jsonpath='{.spec.clusterIP}')
@@ -227,25 +218,15 @@ runners:
         privileged = false
 EOF
 
-# Add node selector if hostname is provided
-if [ -n "$HOSTNAME" ]; then
-    cat >> $TMP_FILE <<EOF
-        [runners.kubernetes.node_selector]
-          "kubernetes.io/hostname" = "$HOSTNAME"
-EOF
-fi
-
-# Add additional TOML configuration if provided
-if [ -n "$TOML_FILE" ]; then
-    # Read the TOML file and add proper indentation (8 spaces)
-    while IFS= read -r line; do
-        # Skip empty lines
-        if [[ -z "$line" ]]; then
-            continue
-        fi
-        echo "        $line" >> $TMP_FILE
-    done < "$TOML_FILE"
-fi
+# Add additional TOML configuration
+# Read the TOML file and add proper indentation (8 spaces)
+while IFS= read -r line; do
+    # Skip empty lines
+    if [[ -z "$line" ]]; then
+        continue
+    fi
+    echo "        $line" >> $TMP_FILE
+done < "$TOML_FILE"
 
 # Add the rest of the configuration
 cat >> $TMP_FILE <<EOF
@@ -271,9 +252,6 @@ helm upgrade --install gitlab-runner-$NAME gitlab/gitlab-runner \
 
 echo "GitLab Runner installed/upgraded successfully in namespace: $RUNNER_NAMESPACE"
 echo "CI jobs will run in namespace: $CI_NAMESPACE"
-if [ -n "$HOSTNAME" ]; then
-    echo "Runner constrained to node: $HOSTNAME"
-fi
 
 # Create a self-adminstered CA cert corresponding to the Gitlab instance
 script_dir="$(dirname "${BASH_SOURCE[0]}")"
