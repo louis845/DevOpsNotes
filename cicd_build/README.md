@@ -137,4 +137,21 @@ To connect to the Jupyter notebook, open up an `.ipynb` file in VSCode, and pres
 
 ## Interactive access with VSCode Remote Extension + SSH
 
-[See this file](interactive.md).
+Sometimes, its better to have a full-fledged interactive development experience with Jupyter Notebook and with access to the datasets/repo as if the environment were open locally. [See this file](interactive.md). However all contents in the VSCode extension development environment is expected to be temporary (resets when the pod shuts down)!
+
+## Fast CI/CD testing pipeline
+
+For fast environment setup and testing, it is best to **not have to compile the Docker image** every time a push is done. This is because compiling a Docker image takes time (Kaniko has to interact with Harbor, and afterwards the kubelet has to pull the image from Harbor). It is best to switch off the image compilation pipelines using a flag (and the `rules` tag). Gitlab runners automatically download and update the latest repository contents. So the best behaviour is to set the Docker image up once, and then add the `src/` folder (which will be updated everytime a Gitlab runner job is dispatched). For example:
+
+```yaml
+test:
+  tags:
+      - kubernetes # run using the generic Kubernetes gitlab runner
+  stage: test
+  image:
+    name: 10.152.183.59/${IMAGE_NAME}-basic-env:latest # base environment (without Jupyter or SSH daemon), only with relevant Python packages
+  script:
+     - export PYTHONPATH="${PYTHONPATH}:${PWD}/src" # export the `src/` folder, will be updated everytime
+     - cd tests/ # cd to tests folder
+     - python -m unittest discover -s tests -v # add unit tests
+```
