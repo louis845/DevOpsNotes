@@ -175,3 +175,6 @@ Create a `repo-login-credentials` K8S secret so that Kaniko is able to login to 
 ```sh
 kubectl create secret generic -n harbor-jobs repo-login-credentials --from-file=config.json=<local file config>.json
 ```
+
+## Create a `kaniko-cache` library in Harbor
+To enable caching, create a `kaniko-cache` library in Harbor, so the image url `/kaniko-cache/cache` can be accessed.
