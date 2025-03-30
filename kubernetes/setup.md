@@ -84,6 +84,9 @@ To verify whether the nodes have joined as workers, use the following command:
 microk8s kubectl get nodes
 ```
 
+## Enable RBAC for multiple developer access
+
+
 ## Install kubernetes dashboard
 
 Use the following command on the control plane node to install the dashboard
