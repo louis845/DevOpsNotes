@@ -155,3 +155,34 @@ test:
      - cd tests/ # cd to tests folder
      - python -m unittest discover -s tests -v # add unit tests
 ```
+
+## Shared and reusable data from PVs
+It is often the case one has to re-use data from PVs and create PVCs to mount into different namespaces. Even if "Retain" reclaim policy is set, the data may be unreclaimable due to the PV already having a claim ref, so new PVCs that reference the PV cannot reuse it.
+
+To tackle this problem, one has to modify the PV to delete the claimRef from it, so it is Available. To do so, use `kubectl edit pv <pv name>` and delete the entire `claimRef` section from `spec`. One can delete an entire line using `dd` in `vi`. 
+
+To mass delete all claimRef(s) from the PVs, use the following script, which deletes all `claimRefs` belonging to the `rook-cephfs` storageClass.
+```sh
+#!/bin/bash
+
+# Get all PVs with storageClass rook-cephfs
+PVS=$(kubectl get pv -o json | jq -r '.items[] | select(.spec.storageClassName == "rook-cephfs") | .metadata.name')
+
+# Loop through each PV and remove the claimRef if it exists
+for PV in $PVS; do
+  echo "Processing PV: $PV"
+  
+  # Check if claimRef exists for this PV - fixed jq query
+  CLAIM_REF_EXISTS=$(kubectl get pv $PV -o json | jq -r 'if .spec.claimRef then "true" else "false" end')
+  
+  if [ "$CLAIM_REF_EXISTS" = "true" ]; then
+    echo "  Removing claimRef from PV: $PV"
+    kubectl patch pv $PV --type json -p '[{"op": "remove", "path": "/spec/claimRef"}]'
+    echo "  ClaimRef removed successfully"
+  else
+    echo "  No claimRef found for PV: $PV"
+  fi
+done
+
+echo "Done processing all rook-cephfs PVs"
+```
