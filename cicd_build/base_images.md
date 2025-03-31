@@ -19,5 +19,5 @@ RUN pip install --no-cache-dir torch==2.6.0
 FROM python:latest
 
 RUN pip install --no-cache-dir numpy
-RUN pip install --no-cache-dir fastapi
+RUN pip install --no-cache-dir fastapi[standard]
 ```
