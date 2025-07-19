@@ -261,13 +261,20 @@ global:
   ingress:
     configureCertmanager: false
     class: nginx # default github-nginx, set to be compatible with ingress-nginx
+  minio:
+    enabled: true
 gitlab:
   webservice:
     ingress:
       tls:
         secretName: selfsigned-cert-tls
+  toolbox:
+    backups:
+      objectStorage:
+        enabled: true
 nginx-ingress:
   enabled: false
+installCertmanager: false
 certmanager:
   install: false
 certmanager-issuer:
